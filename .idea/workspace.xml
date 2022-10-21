@@ -1,14 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="ddc342e5-8191-4334-80fa-e183edba3b5c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/criar_pdf.py" beforeDir="false" afterPath="$PROJECT_DIR$/criar_pdf.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/relatorio_financeiro.py" beforeDir="false" afterPath="$PROJECT_DIR$/relatorio_financeiro.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/BootCamp-EduFinance.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/BootCamp-EduFinance.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/aula2.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/criar_pdf.py" beforeDir="false" afterPath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/criar_pdf.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/enviar_email.py" beforeDir="false" afterPath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/enviar_email.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/graphics/dolar.png" beforeDir="false" afterPath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/graphics/dolar.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/graphics/ibov.png" beforeDir="false" afterPath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/graphics/ibov.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/graphics/inflacao.png" beforeDir="false" afterPath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/graphics/inflacao.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/graphics/juros.png" beforeDir="false" afterPath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/graphics/juros.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/graphics/selic.png" beforeDir="false" afterPath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/graphics/selic.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/graphics/sp.png" beforeDir="false" afterPath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/graphics/sp.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/relatorio_financeiro.py" beforeDir="false" afterPath="$PROJECT_DIR$/Aula-02-Relatorio-Financeiro/relatorio_financeiro.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Aula-03-Factor-Investing/factory_investing.py" beforeDir="false" afterPath="$PROJECT_DIR$/Aula-03-Factor-Investing/factory_investing.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -21,7 +38,8 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true"
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "/home/cayo/Documents/Cayo/BootCamp-EduFinance"
   }
 }]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />

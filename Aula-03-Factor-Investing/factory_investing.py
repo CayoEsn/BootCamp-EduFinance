@@ -105,8 +105,6 @@ for i, nome_empresa in enumerate(dados_cotacoes_mensais.columns):
             periods=6).replace([np.inf, -np.inf, -1], 0)
 
 
-# df_retornos_6m.head(10)
-
 df_retornos = df_retornos.loc["2015-12-31":]
 df_retornos_6m = df_retornos_6m.loc["2015-12-31":]
 
@@ -126,6 +124,9 @@ df_retornos_6m = pd.melt(df_retornos_6m, id_vars="Date",
 dados_cotacoes_mensais = dados_cotacoes_mensais.dropna()
 df_retornos = df_retornos.dropna()
 df_retornos_6m = df_retornos_6m.dropna()
+
+print(df_retornos_6m)
+print(555)
 
 lista_retornos = []
 

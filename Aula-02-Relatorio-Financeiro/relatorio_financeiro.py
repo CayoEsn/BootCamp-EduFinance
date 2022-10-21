@@ -1,29 +1,26 @@
 from criar_pdf import PDF
 import pandas as pd
 import numpy as np
-from pandas._config import display
 from pandas_datareader import data as pdr
 from datetime import datetime
 from datetime import timedelta
-import mplfinance as mpf
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import matplotlib.dates as mdates
-from selenium import webdriver
 from bcb import currency
 from bcb import sgs
 from matplotlib.dates import date2num
 import warnings
 from fpdf import FPDF
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
+from criar_pdf import montar_pdf
+import mplcyberpunk
 
 warnings.filterwarnings('ignore')
 
 
 def pegando_dados_di(url):
     driver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver')
-    driver.get("https://dev.to")
     sem_conexao = True
 
     while sem_conexao:
@@ -59,7 +56,6 @@ def tratando_dados_di(df_dados, indice):
     df_dados = df_dados['ÚLT. PREÇO']
     df_dados = df_dados.drop(0, axis=0)
     indice.columns = indice.loc[0]
-    indice_di = indice['VENCTO']
 
     indice = indice.drop(0, axis=0)
     df_dados.index = indice['VENCTO']
@@ -110,11 +106,10 @@ fechamento_de_dia = retorno_diario.iloc[-1, :]
 volatilidade_12m_ibov = retorno_diario['Ibov'].std() * np.sqrt(252)
 volatilidade_12m_sp = retorno_diario['S&P500'].std() * np.sqrt(252)
 
-# print(volatilidade_12m_ibov)
-# print(volatilidade_12m_sp)
-
 fig, ax = plt.subplots()
+
 plt.style.use("cyberpunk")
+
 ax.plot(dados_fechamento.index, dados_fechamento['Ibov'])
 ax.grid(False)
 plt.savefig('./graphics/ibov.png', dpi=300)
@@ -161,7 +156,6 @@ dados_di_recente_tratado = transformando_codigo_em_data(
 dados_di_antigo_tratado = transformando_codigo_em_data(dados_di_antigo_tratado)
 
 fig, ax = plt.subplots()
-
 plt.style.use("cyberpunk")
 ax.set_ylim(3.5, 15)
 ax.plot(dados_di_recente_tratado.index, dados_di_recente_tratado.values,
@@ -176,8 +170,6 @@ plt.savefig('./graphics/juros.png', dpi=300)
 
 selic = sgs.get({'selic': 432}, start='2010-01-01')
 
-print(selic)
-
 fig, ax = plt.subplots()
 plt.style.use("cyberpunk")
 ax.plot(selic.index, selic['selic'])
@@ -189,15 +181,11 @@ plt.savefig('./graphics/selic.png', dpi=300)
 inflacao = sgs.get({'ipca': 433,
                     'igp-m': 189}, start=um_ano_atras + timedelta(180))
 
-print(inflacao)
-
 datas_numericas = date2num(inflacao.index)
 
 fig, ax = plt.subplots()
-
 ax.bar(datas_numericas - 7, inflacao['ipca'], label="IPCA", width=7)
 ax.bar(datas_numericas, inflacao['igp-m'], label="IGP-M", width=7)
-
 ax.yaxis.set_major_formatter(mtick.PercentFormatter())
 ax.xaxis_date()
 formato_data = mdates.DateFormatter('%b-%y')
@@ -209,7 +197,6 @@ plt.savefig('./graphics/inflacao.png', dpi=300)
 # plt.show()
 
 dolar = currency.get('USD', start=um_ano_atras, end=datetime.now())
-print(dolar)
 
 dolar_mensal = dolar.resample("M").last()
 dolar_anual = dolar.resample("Y").last()
@@ -217,20 +204,12 @@ dolar_anual = dolar.resample("Y").last()
 dolar_diario = dolar.pct_change().dropna()
 fechamento_de_dia_dolar = dolar_diario.iloc[-1, :]
 
-print(fechamento_de_dia_dolar)
-
 retorno_mes_a_mes_dolar = dolar_mensal.pct_change().dropna()
 retorno_mes_a_mes_dolar = retorno_mes_a_mes_dolar.iloc[1:, :]
 
-print(retorno_mes_a_mes_dolar)
-
 retorno_no_ano_dolar = dolar_anual.pct_change().dropna()
 
-print(retorno_no_ano_dolar)
-
 volatilidade_12m_dolar = dolar_diario['USD'].std() * np.sqrt(252)
-
-print(volatilidade_12m_dolar)
 
 fig, ax = plt.subplots()
 plt.style.use("cyberpunk")
@@ -245,163 +224,8 @@ for indice in retorno_mes_a_mes.index:
     mes = indice.strftime("%b")
     meses.append(mes)
 
-# meses
-
 # Definindo config básicas do PDF
 
-pdf = PDF("P", "mm", "Letter")
-pdf.set_auto_page_break(auto=True, margin=15)
-pdf.alias_nb_pages()
-pdf.add_page()
-pdf.set_fill_color(255, 255, 255)
-pdf.set_draw_color(35, 155, 132)
-
-# pdf.output('aula2.pdf')
-
-pdf.image('./imgs/nave1.png', x=115, y=70, w=75, h=33)
-pdf.set_font('Arial', 'B', 18)
-pdf.cell(0, 10, "1 - Ações e câmbio", ln=True, border=False, fill=False)
-pdf.ln(2)
-
-pdf.set_font('Arial', '', 14)
-pdf.cell(0, 15, "1.1 Fechamento do mercado", ln=True, border=False, fill=True)
-
-pdf.ln(7)
-
-pdf.set_font('Arial', '', 13)
-pdf.cell(25, 15, " Ibovespa", ln=False, border=True, fill=True)
-pdf.cell(20, 15, f" {str(round(fechamento_de_dia[0] * 100, 2))}%", ln=True,
-         border=True, fill=False)
-
-# fechamento s&p500
-pdf.cell(25, 15, " S&P500", ln=False, border=True, fill=True)
-pdf.cell(
-    20, 15, f" {str(round(fechamento_de_dia[1] * 100, 2))}%", ln=True, border=True, fill=False)
-
-# fechamento Dólar
-pdf.cell(25, 15, " Dólar", ln=False, border=True, fill=True)
-pdf.cell(
-    20, 15, f" {str(round(fechamento_de_dia_dolar[0] * 100, 2))}%", ln=True, border=True, fill=False)
-
-pdf.ln(7)
-
-pdf.set_font('Arial', '', 14)
-pdf.cell(0, 15, "   1.2 Gráficos Ibovespa, S&P500 e Dólar",
-         ln=True, border=False, fill=False)
-
-pdf.cell(95, 15, "Ibovespa", ln=False, border=False, fill=False, align="C")
-pdf.cell(100, 15, "S&P500", ln=True, border=False, fill=False, align="C")
-pdf.image("./graphics/ibov.png", w=80, h=70, x=20, y=160)
-pdf.image("./graphics/sp.png", w=80, h=70, x=115, y=160)
-
-pdf.ln(130)
-
-pdf.cell(0, 15, "Dólar", ln=True, border=False, fill=False, align="C")
-pdf.image("./graphics/dolar.png", w=100, h=75, x=58)
-
-pdf.ln(2)
-
-pdf.set_font('Arial', '', 14)
-pdf.cell(0, 15, "   1.3 Rentabilidade mês a mês",
-         ln=True, border=False, fill=False)
-
-# escrevendo os meses
-pdf.cell(17, 10, "", ln=False, border=False, fill=True, align="C")
-
-for mes in meses:
-    pdf.cell(16, 10, mes, ln=False, border=True, fill=True, align="C")
-
-pdf.ln(10)
-
-pdf.cell(17, 10, "Ibov", ln=False, border=True, fill=True, align="C")
-
-pdf.set_font('Arial', '', 12)
-for rent in retorno_mes_a_mes['Ibov']:
-    pdf.cell(16, 10, f" {str(round(rent * 100, 2))}%",
-             ln=False, border=True, align="C")
-
-pdf.ln(10)
-
-# escrevendo o S&P
-
-pdf.cell(17, 10, "S&P500", ln=False, border=True, fill=True, align="C")
-
-pdf.set_font('Arial', '', 12)
-for rent in retorno_mes_a_mes['S&P500']:
-    pdf.cell(16, 10, f" {str(round(rent * 100, 2))}%",
-             ln=False, border=True, align="C")
-
-pdf.ln(10)
-
-# escrevendo o Dólar
-
-pdf.cell(17, 10, "Dólar", ln=False, border=True, fill=True, align="C")
-
-pdf.set_font('Arial', '', 12)
-for rent in retorno_mes_a_mes_dolar['USD']:
-    pdf.cell(16, 10, f" {str(round(rent * 100, 2))}%",
-             ln=False, border=True, align="C")
-
-pdf.ln(10)
-
-pdf.set_font('Arial', '', 14)
-pdf.cell(0, 15, "   1.4 Rentabilidade no ano",
-         ln=True, border=False, fill=False)
-
-# rent anual ibov
-pdf.set_font('Arial', '', 13)
-pdf.cell(25, 10, "Ibovespa", ln=False, border=True, fill=True, align="C")
-pdf.cell(
-    20, 10, f" {str(round(retorno_no_ano.iloc[0, 0] * 100, 2))}%", ln=True, border=True, align="C")
-
-# rent anual S&P
-pdf.cell(25, 10, "S&P500", ln=False, border=True, fill=True, align="C")
-pdf.cell(
-    20, 10, f" {str(round(retorno_no_ano.iloc[0, 1] * 100, 2))}%", ln=True, border=True, align="C")
-
-# rent anual Dólar
-pdf.cell(25, 10, "Dólar", ln=False, border=True, fill=True, align="C")
-pdf.cell(
-    20, 10, f" {str(round(retorno_no_ano_dolar.iloc[0, 0] * 100, 2))}%", ln=True, border=True, align="C")
-
-pdf.ln(20)
-
-pdf.set_font('Arial', '', 14)
-pdf.cell(0, 15, "   1.5 Volatilidade 12M", ln=True, border=False, fill=False)
-
-# vol ibov
-pdf.set_font('Arial', '', 13)
-pdf.cell(25, 10, "Ibovespa", ln=False, border=True, fill=True, align="C")
-pdf.cell(20, 10, f" {str(round(volatilidade_12m_ibov * 100, 2))}%",
-         ln=True, border=True, align="C")
-
-# vol s&p500
-pdf.cell(25, 10, "S&P500", ln=False, border=True, fill=True, align="C")
-pdf.cell(20, 10, f" {str(round(volatilidade_12m_sp * 100, 2))}%",
-         ln=True, border=True, align="C")
-
-# vol dolar
-pdf.cell(25, 10, "Dólar", ln=False, border=True, fill=True, align="C")
-pdf.cell(20, 10, f" {str(round(volatilidade_12m_dolar * 100, 2))}%",
-         ln=True, border=True, align="C")
-
-pdf.image('./imgs/nave2.png', x=115, y=45, w=70, h=70, type='', link='')
-
-pdf.ln(7)
-
-pdf.set_font('Arial', 'B', 18)
-pdf.cell(0, 15, "2 - Dados econômicos", ln=True, border=False, fill=False)
-
-pdf.set_font('Arial', '', 14)
-pdf.cell(0, 15, "2.1 Curva de juros", ln=True, border=False, fill=False)
-pdf.image("./graphics/juros.png", w=125, h=100, x=40, y=140)
-
-pdf.ln(135)
-
-pdf.cell(0, 15, "2.2 Inflacão", ln=True, border=False, fill=False)
-pdf.image("./graphics/inflacao.png", w=110, h=90, x=40)
-
-pdf.cell(0, 15, "2.3 Selic", ln=True, border=False, fill=False)
-pdf.image("./graphics/selic.png", w=110, h=90, x=40)
-
-pdf.output('aula2.pdf')
+montar_pdf('aula2.pdf', data_final, fechamento_de_dia, fechamento_de_dia_dolar, meses, retorno_mes_a_mes,
+           retorno_mes_a_mes_dolar,
+           retorno_no_ano, retorno_no_ano_dolar, volatilidade_12m_ibov, volatilidade_12m_sp, volatilidade_12m_dolar)
