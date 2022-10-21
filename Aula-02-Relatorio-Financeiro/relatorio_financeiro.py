@@ -1,4 +1,3 @@
-import profile
 from criar_pdf import PDF
 import pandas as pd
 import numpy as np
@@ -10,25 +9,82 @@ import mplfinance as mpf
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import matplotlib.dates as mdates
-import mplcyberpunk
-import time
 from selenium import webdriver
-from selenium.webdriver.firefox.service import Service
-from webdriver_manager.firefox import GeckoDriverManager
-import requests
 from bcb import currency
 from bcb import sgs
 from matplotlib.dates import date2num
-from selenium.webdriver import FirefoxOptions
-from selenium.webdriver.firefox.options import Options
 import warnings
 from fpdf import FPDF
-
-
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
 warnings.filterwarnings('ignore')
+
+
+def pegando_dados_di(url):
+    driver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver')
+    driver.get("https://dev.to")
+    sem_conexao = True
+
+    while sem_conexao:
+        try:
+            driver.get(url)
+            sem_conexao = False
+        except:
+            pass
+
+    local_tabela = '''
+    //div[@id = "containerPop"]//div[@id = "pageContent"]//form//table//tbody//tr[3]//td[3]//table
+    '''
+
+    local_indice = '''
+    //div[@id = "containerPop"]//div[@id = "pageContent"]//form//table//tbody//tr[3]//td[1]//table
+    '''
+
+    elemento = driver.find_element("xpath", local_tabela)
+    elemento_indice = driver.find_element("xpath", local_indice)
+    html_tabela = elemento.get_attribute('outerHTML')
+    html_indice = elemento_indice.get_attribute('outerHTML')
+
+    driver.quit()
+
+    tabela = pd.read_html(html_tabela)[0]
+    indice = pd.read_html(html_indice)[0]
+
+    return tabela, indice
+
+
+def tratando_dados_di(df_dados, indice):
+    df_dados.columns = df_dados.loc[0]
+    df_dados = df_dados['ÚLT. PREÇO']
+    df_dados = df_dados.drop(0, axis=0)
+    indice.columns = indice.loc[0]
+    indice_di = indice['VENCTO']
+
+    indice = indice.drop(0, axis=0)
+    df_dados.index = indice['VENCTO']
+    df_dados = df_dados.astype(int)
+    df_dados = df_dados[df_dados != 0]
+    df_dados = df_dados / 1000
+
+    return df_dados
+
+
+def transformando_codigo_em_data(df):
+    lista_datas = []
+
+    for indice in df.index:
+        letra = indice[0]
+        ano = indice[1:3]
+        mes = legenda[letra]
+        data = f"{mes}-{ano}"
+        data = datetime.strptime(data, "%b-%y")
+        lista_datas.append(data)
+
+    df.index = lista_datas
+
+    return df
+
 
 # pegando dados do yahoo finance.
 indices = ['^BVSP', '^GSPC']
@@ -88,104 +144,6 @@ pagetype=pop&caminho=Resumo%20Estat%EDstico%20-%20Sistema%20Preg%E3o&Data={data_
 url_mais_antiga = f'''http://www2.bmf.com.br/pages/portal/bmfbovespa/boletim1/SistemaPregao1.asp?
 pagetype=pop&caminho=Resumo%20Estat%EDstico%20-%20Sistema%20Preg%E3o&Data={data_inicial}
 &Mercadoria=DI1'''
-
-
-def pegando_dados_di(url):
-    driver = webdriver.Chrome('/usr/lib/chromium-browser/chromedriver')
-    driver.get("https://dev.to")
-    sem_conexao = True
-
-    while sem_conexao:
-        try:
-            driver.get(url)
-            sem_conexao = False
-        except:
-            pass
-
-    local_tabela = '''
-    //div[@id = "containerPop"]//div[@id = "pageContent"]//form//table//tbody//tr[3]//td[3]//table
-    '''
-
-    local_indice = '''
-    //div[@id = "containerPop"]//div[@id = "pageContent"]//form//table//tbody//tr[3]//td[1]//table
-    '''
-
-    elemento = driver.find_element("xpath", local_tabela)
-
-    elemento_indice = driver.find_element("xpath", local_indice)
-
-    html_tabela = elemento.get_attribute('outerHTML')
-    html_indice = elemento_indice.get_attribute('outerHTML')
-
-    driver.quit()
-
-    tabela = pd.read_html(html_tabela)[0]
-    indice = pd.read_html(html_indice)[0]
-
-    return tabela, indice
-
-
-def tratando_dados_di(df_dados, indice):
-    df_dados.columns = df_dados.loc[0]
-
-    df_dados = df_dados['ÚLT. PREÇO']
-
-    df_dados = df_dados.drop(0, axis=0)
-
-    indice.columns = indice.loc[0]
-
-    indice_di = indice['VENCTO']
-
-    indice = indice.drop(0, axis=0)
-
-    df_dados.index = indice['VENCTO']
-
-    df_dados = df_dados.astype(int)
-
-    df_dados = df_dados[df_dados != 0]
-
-    df_dados = df_dados / 1000
-
-    return df_dados
-
-
-def transformando_codigo_em_data(df):
-    lista_datas = []
-
-    for indice in df.index:
-        letra = indice[0]
-        ano = indice[1:3]
-
-        mes = legenda[letra]
-
-        data = f"{mes}-{ano}"
-
-        data = datetime.strptime(data, "%b-%y")
-
-        lista_datas.append(data)
-
-    df.index = lista_datas
-
-    return df
-
-
-class PDF(FPDF):
-
-    def header(self):
-        self.image('./imgs/logo.png', 10, 8, 40)
-        self.set_font('Arial', 'B', 20)
-        self.ln(15)
-        self.set_draw_color(35, 155, 132)  # cor RGB
-        self.cell(15, ln=False)
-        self.cell(150, 15, f"Relatório de mercado {data_final}",
-                  border=True, ln=True, align="C")
-        self.ln(5)
-
-    def footer(self):
-        self.set_y(-15)  # espaço ate o final da folha
-        self.set_font('Arial', 'I', 10)
-        self.cell(0, 10, f"{self.page_no()}/{{nb}}", align="C")
-
 
 di_mais_recente, indice_di_mais_recente = pegando_dados_di(url=url_mais_att)
 di_mais_antigo, indice_di_mais_antigo = pegando_dados_di(url=url_mais_antiga)
